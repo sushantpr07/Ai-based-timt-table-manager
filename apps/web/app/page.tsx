@@ -169,6 +169,17 @@ export default function Home() {
             </div>}
           </div>
           <ThemeToggle/>
+          {viewer && (
+            <button 
+              className="button button-quiet" 
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", fontSize: "13px", height: "36px", borderRadius: "8px" }} 
+              onClick={() => void signOut()}
+              title="Sign out of Dayleaf"
+            >
+              <LogOut size={14} />
+              <span>Sign out</span>
+            </button>
+          )}
           {viewer && <button className="icon-button notification" onClick={() => setActive("Notifications")} aria-label="Open notifications"><Bell size={18}/><i/></button>}
           {viewer ? <button className="top-avatar" onClick={() => void signOut()} aria-label="Sign out">{viewer.full_name.split(" ").map(part => part[0]).slice(0, 2).join("")}</button> : <Link className="top-avatar" href="/sign-in" aria-label="Sign in">AM</Link>}
         </div>
