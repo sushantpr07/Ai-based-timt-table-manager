@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     api_origin: str = "http://localhost:8000"
     llm_provider: str = "gemini"
     llm_api_key: str | None = None
-    llm_model: str | None = "gemini-1.5-flash"
+    llm_model: str | None = "gemini-3.5-flash-lite"
     smtp_host: str | None = None
     smtp_port: int = 587
     smtp_user: str | None = None
