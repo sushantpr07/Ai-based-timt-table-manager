@@ -1,0 +1,581 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dayleaf &mdash; AI Timetable Manager | Design and Thinking Project Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14101f; --body:#3d3852; --muted:#6f6987; --line:#e7e3f0;
+    --violet:#7c3aed; --violet-2:#a855f7; --violet-soft:#f3edff; --obsidian:#0d0a16;
+    --green:#059669; --amber:#d97706; --cyan:#0284c7;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{font-family:"Plus Jakarta Sans","Segoe UI",system-ui,sans-serif;color:var(--body);background:#161224;line-height:1.48}
+
+  /* Top toolbar (hidden when printing) */
+  .topbar{position:sticky;top:0;z-index:20;background:rgba(13,10,22,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(168,85,247,.28);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;color:#fff}
+  .topbar-brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:15px}
+  .topbar-brand span{background:linear-gradient(135deg,#7c3aed,#a855f7);width:28px;height:28px;border-radius:8px;display:grid;place-items:center}
+  .topbar-meta{font-size:12px;color:#c4b5fd}
+  .topbar-actions{display:flex;gap:10px}
+  .topbar-actions button,.topbar-actions a{font:600 13px "Plus Jakarta Sans",sans-serif;border:0;border-radius:9px;padding:9px 16px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;cursor:pointer;text-decoration:none;box-shadow:0 4px 14px rgba(124,58,237,.4)}
+  .topbar-actions a.ghost{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);box-shadow:none}
+
+  /* ---------- Page = one printed A4 landscape sheet ---------- */
+  .page{width:297mm;height:210mm;margin:10mm auto;background:#fff;position:relative;overflow:hidden;
+        padding:14mm 17mm 15mm;display:flex;flex-direction:column;box-shadow:0 10px 36px rgba(0,0,0,.45);border-radius:2mm}
+  .page::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(var(--violet),var(--violet-2))}
+  .page-head{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:3.5mm;margin-bottom:5.5mm}
+  .kicker{font-size:9pt;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--violet)}
+  h2{font-size:20.5pt;font-weight:800;color:var(--ink);letter-spacing:-.02em;line-height:1.15;margin-top:1mm}
+  .page-num{font-size:8.5pt;color:var(--muted);font-weight:600;text-align:right;white-space:nowrap}
+  .page-foot{position:absolute;left:17mm;right:17mm;bottom:5.5mm;display:flex;justify-content:space-between;font-size:7.5pt;color:#9a94ad}
+  .content{flex:1;min-height:0}
+  p{font-size:10.3pt}
+  h3{font-size:11.8pt;color:var(--ink);font-weight:700;margin-bottom:1.5mm}
+  .lead{font-size:11.6pt;color:var(--body);max-width:235mm}
+
+  /* ---------- Generic layout pieces ---------- */
+  .grid{display:grid;gap:4.5mm}
+  .g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g5{grid-template-columns:repeat(5,1fr)}
+  .card{border:1px solid var(--line);border-radius:3.5mm;padding:4.5mm;background:#fff}
+  .card.soft{background:var(--violet-soft);border-color:#e4d8fb}
+  .card .num{font-size:21pt;font-weight:800;color:var(--violet);line-height:1}
+  .tag{display:inline-block;font-size:7.5pt;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:1mm 2.4mm;border-radius:10mm;background:var(--violet-soft);color:var(--violet);margin-bottom:1.8mm}
+  ul.clean{list-style:none}
+  ul.clean li{font-size:9.8pt;padding-left:5mm;position:relative;margin-bottom:1.5mm}
+  ul.clean li::before{content:"";position:absolute;left:0;top:2mm;width:2mm;height:2mm;border-radius:50%;background:var(--violet-2)}
+
+  /* ---------- Screenshots ---------- */
+  figure.shot{border-radius:3mm;overflow:hidden;border:1px solid #2a2140;background:var(--obsidian);box-shadow:0 4px 16px rgba(40,20,80,.18)}
+  figure.shot img{display:block;width:100%;height:auto}
+  figure.shot.crop img{height:100%;object-fit:cover;object-position:top left}
+  figcaption{font-size:8.3pt;color:var(--muted);margin-top:1.5mm;font-weight:500}
+  .shot-row{display:grid;grid-template-columns:1.75fr 1fr;gap:6mm;align-items:start}
+  .explain h3{margin-top:2.8mm}.explain h3:first-child{margin-top:0}
+  .explain p{font-size:9.6pt}
+
+  /* ---------- Cover ---------- */
+  .cover{padding:0;flex-direction:row}
+  .cover::before{display:none}
+  .cover-left{width:58%;padding:13mm 14mm 12mm 17mm;display:flex;flex-direction:column}
+  .cover-right{width:42%;background:radial-gradient(120% 90% at 100% 100%,#9333ea 0%,#3b0d6b 38%,#0d0a16 75%);color:#fff;padding:13mm 13mm 12mm;display:flex;flex-direction:column;justify-content:space-between}
+  .logo{height:17mm;width:auto;align-self:flex-start}
+  .cover-meta{margin-top:6mm;display:flex;gap:3mm;flex-wrap:wrap}
+  .cover-meta span{font-size:8.5pt;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:10mm;padding:1.4mm 3.5mm;color:var(--ink)}
+  .cover-meta span b{color:var(--violet)}
+  .brand{display:flex;align-items:center;gap:3.5mm;margin-top:9mm}
+  .brand-mark{width:13mm;height:13mm;border-radius:3.5mm;background:linear-gradient(135deg,var(--violet),var(--violet-2));display:grid;place-items:center;color:#fff;font-size:16pt;font-weight:800;box-shadow:0 4px 14px rgba(124,58,237,.4)}
+  .brand-name{font-size:30pt;font-weight:800;color:var(--ink);letter-spacing:-.03em}
+  .cover h1{font-size:22.5pt;line-height:1.15;color:var(--ink);font-weight:800;letter-spacing:-.02em;margin-top:3mm}
+  .cover h1 em{font-style:normal;background:linear-gradient(90deg,var(--violet),var(--violet-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .cover .sub{font-size:10.3pt;color:var(--muted);margin-top:3mm;max-width:140mm}
+  .submitted-to{margin-top:auto;border-left:3.5px solid var(--violet);padding-left:4mm}
+  .submitted-to small{font-size:8pt;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .submitted-to div{font-size:15.5pt;font-weight:800;color:var(--ink)}
+  .submitted-to span{font-size:8.8pt;color:var(--muted);font-weight:500}
+  .team-title{font-size:8.5pt;letter-spacing:.14em;text-transform:uppercase;color:#d8b4fe;font-weight:700;margin-bottom:3mm}
+  table.team{width:100%;border-collapse:collapse;font-size:10pt}
+  table.team th{text-align:left;font-size:7.5pt;letter-spacing:.1em;text-transform:uppercase;color:#c4b5fd;padding:2mm 2.5mm;border-bottom:1px solid rgba(255,255,255,.25)}
+  table.team td{padding:2.6mm 2.5mm;border-bottom:1px solid rgba(255,255,255,.12);color:#fff}
+  table.team td:first-child,table.team th:first-child{width:14mm;text-align:center}
+  table.team td:last-child{font-family:Consolas,monospace;color:#e9d5ff;font-size:9.5pt}
+  .cover-right .dept{font-size:9pt;color:#e9d5ff;line-height:1.6}
+  .cover-right .dept b{color:#fff;font-size:10.5pt}
+
+  /* ---------- Misc blocks ---------- */
+  .stage{border-radius:4mm;padding:4.5mm 4mm;border:1px solid var(--line);position:relative;background:#fff}
+  .stage .n{font-size:25pt;font-weight:800;color:#ede4ff;position:absolute;right:3mm;top:1mm;line-height:1}
+  .stage h3{color:var(--violet);font-size:11.5pt}
+  .stage p{font-size:9.2pt}
+  .quote{border-left:3px solid var(--violet);background:var(--violet-soft);padding:3.8mm 5mm;border-radius:0 3mm 3mm 0;font-size:10.5pt;color:var(--ink);font-weight:600}
+  .flow{display:flex;align-items:stretch;gap:2.5mm}
+  .flow .box{flex:1;border:1px solid var(--line);border-radius:3mm;padding:3.5mm;text-align:center;background:#fff}
+  .flow .box b{display:block;color:var(--ink);font-size:10pt}
+  .flow .box span{font-size:8.5pt;color:var(--muted)}
+  .flow .arrow{display:grid;place-items:center;color:var(--violet);font-weight:800}
+  table.data{width:100%;border-collapse:collapse;font-size:9.4pt}
+  table.data th{text-align:left;background:var(--violet-soft);color:var(--violet);font-size:8pt;letter-spacing:.06em;text-transform:uppercase;padding:2mm 3mm}
+  table.data td{border-bottom:1px solid var(--line);padding:2mm 3mm}
+
+  /* ---------- Final page ---------- */
+  .final{background:radial-gradient(90% 120% at 50% 110%,#9333ea 0%,#3b0d6b 35%,#0d0a16 72%);color:#fff;align-items:center;justify-content:center;text-align:center}
+  .final::before{display:none}
+  .final .logo-wrap{background:#fff;border-radius:3mm;padding:3mm 5mm;display:inline-block}
+  .final .logo-wrap img{height:12mm;display:block}
+  .final h2{color:#fff;font-size:30pt;margin-top:7mm}
+  .final .sub{color:#d8b4fe;font-size:11pt;margin-top:2mm}
+  .sub-box{margin-top:8mm;display:flex;gap:8mm;justify-content:center}
+  .sub-box .b{border:1px solid rgba(255,255,255,.22);border-radius:4mm;padding:5mm 8mm;background:rgba(255,255,255,.06);min-width:88mm}
+  .sub-box small{display:block;font-size:8pt;letter-spacing:.14em;text-transform:uppercase;color:#c4b5fd;font-weight:700;margin-bottom:2mm}
+  .sub-box .big{font-size:19pt;font-weight:800}
+  .sub-box .names{font-size:9.5pt;line-height:1.7;color:#f3e8ff}
+
+  @page{size:A4 landscape;margin:0}
+  @media print{
+    body{background:#fff}
+    .topbar{display:none !important}
+    .page{margin:0;box-shadow:none;border-radius:0;page-break-after:always;break-after:page}
+    .page:last-child{page-break-after:auto;break-after:auto}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand"><span>&#10022;</span> Dayleaf &mdash; Printable Project Presentation &amp; Website Walkthrough (18 Pages)</div>
+  <div class="topbar-meta">Design and Thinking &middot; B.Tech CSE (Cyber Security) &middot; Submitted to Dr. Harinee S</div>
+  <div class="topbar-actions">
+    <a class="ghost" href="Dayleaf_Project_Report.pdf" download>Download Pre-Built PDF</a>
+    <button onclick="window.print()">&#128424; Print / Save as PDF</button>
+  </div>
+</div>
+
+<!-- ============ 1. COVER ============ -->
+<section class="page cover">
+  <div class="cover-left">
+    <img class="logo" src="img/jain_logo.png" alt="JAIN (Deemed-to-be University)">
+    <div class="cover-meta">
+      <span>Subject: <b>Design and Thinking</b></span>
+      <span>Department: <b>B.Tech CSE &mdash; Cyber Security</b></span>
+    </div>
+    <div class="brand"><div class="brand-mark">&#10022;</div><div class="brand-name">Dayleaf</div></div>
+    <h1>AI-Powered <em>Timetable Manager</em><br>&amp; Campus Scheduling Platform</h1>
+    <p class="sub">An intelligent campus scheduling web application that automatically builds clash-free university timetables using mathematical constraint optimization and a Gemini AI assistant &mdash; uniting admins, HODs, faculty and students on one platform.</p>
+    <div class="submitted-to">
+      <small>Submitted to</small>
+      <div>Dr. Harinee S</div>
+      <span>Faculty &middot; Design and Thinking &middot; JAIN (Deemed-to-be University)</span>
+    </div>
+  </div>
+  <div class="cover-right">
+    <div>
+      <div class="team-title">Submitted by &mdash; Team Members</div>
+      <table class="team">
+        <thead><tr><th>SI. No.</th><th>Name</th><th>USN</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Rudrakadh Chadha</td><td>25BTRCC045</td></tr>
+          <tr><td>2</td><td>Sakthivel M</td><td>25BTRCC048</td></tr>
+          <tr><td>3</td><td>Sushant Prakash</td><td>25BTRCC053</td></tr>
+          <tr><td>4</td><td>Sudhanshu Kumar</td><td>25BTRCC052</td></tr>
+          <tr><td>5</td><td>Hrishit Chaudhary</td><td>25BTRCC025</td></tr>
+          <tr><td>6</td><td>Mohamed Badreldin</td><td>25BTRCC061</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="dept">
+      <b>Department of Computer Science &amp; Engineering</b><br>
+      Specialization: B.Tech CSE (Cyber Security)<br>
+      JAIN (Deemed-to-be University)
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. INTRODUCTION ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">01 &middot; Project Overview</div><h2>What is Dayleaf?</h2></div><div class="page-num">Page 2 of 18</div></div>
+  <div class="content">
+    <p class="lead">Dayleaf is an <b>AI timetable manager</b> built for universities and engineering colleges. The institution enters its departments, subjects, teachers, classrooms and labs once &mdash; Dayleaf then computes a complete weekly timetable where <b>no room, teacher or student section is ever double-booked</b>. Teachers and students sign in to view their personal real-time schedules.</p>
+    <div class="grid g3" style="margin-top:7mm">
+      <div class="card soft"><span class="tag">Automate</span><h3>Timetable in seconds</h3><p>A mathematical constraint solver (Google OR-Tools CP-SAT) places every lecture and lab into a valid slot &mdash; replacing weeks of spreadsheet work.</p></div>
+      <div class="card soft"><span class="tag">Assist</span><h3>Built-in AI Copilot</h3><p>Dayleaf AI (Google Gemini) answers questions in plain English, like "find a free room on Wednesday afternoon", and prepares verified timetable drafts.</p></div>
+      <div class="card soft"><span class="tag">Access</span><h3>One portal, every role</h3><p>Role-based workspaces for College Admin, HOD, Faculty and Students &mdash; each person sees and controls only what their role permits.</p></div>
+    </div>
+    <div class="grid g4" style="margin-top:6mm">
+      <div class="card"><div class="num">4</div><p>Departments configured<br><small>CSE &middot; CYS &middot; DS &middot; ECE</small></p></div>
+      <div class="card"><div class="num">15</div><p>Classrooms &amp; labs<br><small>with capacity &amp; room type</small></p></div>
+      <div class="card"><div class="num">25</div><p>Campus accounts seeded<br><small>4 HODs &middot; 11 faculty &middot; 10 students</small></p></div>
+      <div class="card"><div class="num">0</div><p>Clashes<br><small>in the published timetable</small></p></div>
+    </div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 3. WHY NEEDED TODAY ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">02 &middot; Real-World Need Today</div><h2>Why colleges need Dayleaf in today's date</h2></div><div class="page-num">Page 3 of 18</div></div>
+  <div class="content">
+    <div class="grid g2" style="gap:7mm">
+      <div>
+        <h3>Problems in today's manual scheduling</h3>
+        <ul class="clean" style="margin-top:3mm">
+          <li><b>Timetables are still built manually in Excel</b> &mdash; taking coordinators 2 to 3 weeks at the start of every semester.</li>
+          <li><b>Frequent clashes:</b> two batches assigned to the same computer lab, or one professor scheduled in two halls simultaneously.</li>
+          <li><b>One change breaks the whole week</b> &mdash; a single faculty change or new section forces hours of manual re-checking.</li>
+          <li><b>High-tech labs sit idle</b> while lecture halls overflow, because room utilization is never measured.</li>
+          <li><b>Students and teachers get updates late</b> via scattered WhatsApp forwards and notice-board printouts.</li>
+          <li><b>NEP 2020 multidisciplinary courses</b> and growing batch sizes have made manual scheduling mathematically intractable.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Manual process vs. Dayleaf</h3>
+        <table class="data" style="margin-top:3mm">
+          <thead><tr><th>Manual Excel Process</th><th>With Dayleaf Platform</th></tr></thead>
+          <tbody>
+            <tr><td>2&ndash;3 weeks of spreadsheet work</td><td><b>One click</b> &mdash; CP-SAT solver builds a draft</td></tr>
+            <tr><td>Clashes discovered after classes start</td><td><b>Hard constraints</b> make clashes impossible</td></tr>
+            <tr><td>Room usage is unknown</td><td><b>Live analytics</b> on room &amp; faculty load</td></tr>
+            <tr><td>Edits break other slots silently</td><td><b>Drag-and-drop</b> edits with live rule checks</td></tr>
+            <tr><td>PDFs sent on WhatsApp</td><td><b>Personal login portal</b> + instant notifications</td></tr>
+            <tr><td>No trace of who changed what</td><td><b>Tamper-evident audit log</b> of every action</td></tr>
+          </tbody>
+        </table>
+        <div class="quote" style="margin-top:5mm">"How might we give every college a timetable that is clash-free, fair to teachers, and always up to date &mdash; without weeks of manual effort?"</div>
+      </div>
+    </div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 4. DESIGN THINKING ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">03 &middot; Design Thinking Methodology</div><h2>How we applied the 5 stages of Design Thinking</h2></div><div class="page-num">Page 4 of 18</div></div>
+  <div class="content">
+    <div class="grid g5" style="gap:4mm">
+      <div class="stage"><div class="n">1</div><h3>Empathize</h3><p>Interviewed students, faculty, HODs and timetable coordinators about daily scheduling pain points.</p></div>
+      <div class="stage"><div class="n">2</div><h3>Define</h3><p>Defined the core problem: manual timetables are slow, error-prone and opaque. Users need clash-free automation with human control.</p></div>
+      <div class="stage"><div class="n">3</div><h3>Ideate</h3><p>Evaluated spreadsheet macros, greedy heuristics, and constraint programming + AI. Selected OR-Tools CP-SAT + Gemini AI.</p></div>
+      <div class="stage"><div class="n">4</div><h3>Prototype</h3><p>Engineered Dayleaf: Next.js dark-mode studio, FastAPI backend, CP-SAT solver, Gemini assistant and role-based portals.</p></div>
+      <div class="stage"><div class="n">5</div><h3>Test</h3><p>Seeded a full 4-department campus, published a 33-session master timetable and verified 50/50 automated API test suites.</p></div>
+    </div>
+    <div class="grid g2" style="margin-top:7mm;gap:7mm">
+      <div class="card">
+        <h3>What campus stakeholders told us (Empathize)</h3>
+        <ul class="clean" style="margin-top:2mm">
+          <li><b>College Admin:</b> "Every semester I spend weeks fixing cross-department clashes in Excel."</li>
+          <li><b>Department HOD:</b> "Shared computer labs get double-booked between CSE and Cybersecurity batches."</li>
+          <li><b>Faculty Member:</b> "Some days I get 4 back-to-back lectures without a break, and other days long empty gaps."</li>
+          <li><b>B.Tech Student:</b> "We walk to a lab and find another section already inside."</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Key design decisions (Define &rarr; Ideate)</h3>
+        <ul class="clean" style="margin-top:2mm">
+          <li><b>Hard constraints</b> that can never be violated (rooms, faculty, sections, seat capacity, lab equipment).</li>
+          <li><b>Soft constraints</b> to optimize human comfort &mdash; balanced daily load and fewer idle gaps.</li>
+          <li><b>Conversational AI</b> so staff can ask questions in plain language.</li>
+          <li><b>Draft &rarr; Review &rarr; Publish</b> workflow so administrators always have final approval.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 5. ARCHITECTURE ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">04 &middot; System Architecture</div><h2>How Dayleaf works under the hood</h2></div><div class="page-num">Page 5 of 18</div></div>
+  <div class="content">
+    <div class="flow">
+      <div class="box"><b>1. Campus Master Data</b><span>Departments, terms, rooms, faculty, sections</span></div><div class="arrow">&rarr;</div>
+      <div class="box"><b>2. Teaching Assignments</b><span>Faculty + Subject + Section + Weekly hours</span></div><div class="arrow">&rarr;</div>
+      <div class="box"><b>3. CP-SAT Constraint Solver</b><span>Computes clash-free slot &amp; room for every class</span></div><div class="arrow">&rarr;</div>
+      <div class="box"><b>4. Draft &amp; HOD Review</b><span>Drag-and-drop edit, auto-repair, approval</span></div><div class="arrow">&rarr;</div>
+      <div class="box"><b>5. Live Publication</b><span>Faculty &amp; student portals update immediately</span></div>
+    </div>
+    <div class="grid g3" style="margin-top:7mm">
+      <div class="card">
+        <span class="tag">Hard constraints &mdash; strictly enforced</span>
+        <ul class="clean" style="margin-top:2mm">
+          <li>At most one session per room per time slot</li>
+          <li>A teacher cannot be in two rooms at once</li>
+          <li>A student section cannot have overlapping classes</li>
+          <li>Room capacity must be &ge; section student count</li>
+          <li>Lab courses scheduled only in laboratory rooms</li>
+          <li>Faculty availability windows &amp; breaks respected</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="tag">Soft constraints &mdash; optimized</span>
+        <ul class="clean" style="margin-top:2mm">
+          <li>Even distribution of sessions across weekdays</li>
+          <li>Minimized idle gaps for sections and teachers</li>
+          <li>Weekly teaching load cap per faculty (default 18)</li>
+          <li>Lower soft-penalty score = higher schedule quality</li>
+        </ul>
+        <span class="tag" style="margin-top:3mm">Gemini AI Copilot</span>
+        <p style="font-size:9.3pt">Translates natural-language prompts into structured queries or draft generation &mdash; still validated by the CP-SAT solver.</p>
+      </div>
+      <div class="card">
+        <span class="tag">Full-Stack Technology</span>
+        <table class="data" style="margin-top:1mm">
+          <tbody>
+            <tr><td><b>Frontend</b></td><td>Next.js &middot; React &middot; TypeScript</td></tr>
+            <tr><td><b>Backend API</b></td><td>Python &middot; FastAPI &middot; Pydantic</td></tr>
+            <tr><td><b>Optimizer</b></td><td>Google OR-Tools CP-SAT</td></tr>
+            <tr><td><b>AI Engine</b></td><td>Google Gemini API + Fallback</td></tr>
+            <tr><td><b>Database</b></td><td>SQLAlchemy &middot; SQLite / PostgreSQL</td></tr>
+            <tr><td><b>Security</b></td><td>HTTP-only JWT &middot; CSRF &middot; RBAC</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 6. LANDING PAGE (OUTSIDE ANGLE) ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">05 &middot; Website Walkthrough &mdash; Public Angle</div><h2>Landing page &amp; interactive preview studio</h2></div><div class="page-num">Page 6 of 18</div></div>
+  <div class="content shot-row">
+    <div><figure class="shot"><img src="img/01_landing.png" alt="Dayleaf landing page"></figure><figcaption>Fig 1. Dayleaf public landing page in Obsidian &amp; Electric Violet theme with live constraint engine card and KPI metrics.</figcaption></div>
+    <div class="explain">
+      <h3>1. Hero Banner</h3><p><b>"Smarter Schedules. Zero Clashes. Pure Flow."</b> &mdash; immediately communicates the value proposition with primary actions to plan a semester, consult Dayleaf AI, or export CSV.</p>
+      <h3>2. Constraint Engine Status</h3><p>Right-hand glassmorphic card shows live synced sessions (Data Structures, Cyber Networks, AI &amp; Neural Systems) with a <b>48ms solver speed</b> badge.</p>
+      <h3>3. Four Core Pillars</h3><p>Constraint Solver, Dayleaf Copilot, Zero-Clash Engine, and One-Click Export explained at a glance.</p>
+      <h3>4. Live Campus Metrics</h3><p>Displays weekly scheduled sessions, faculty availability percentage, room utilization and open conflict count (00 clashes).</p>
+    </div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 7. SIGN-IN + ADMIN OVERVIEW ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">05 &middot; Website Walkthrough &mdash; Authentication &amp; Overview</div><h2>Secure sign-in &amp; live institution dashboard</h2></div><div class="page-num">Page 7 of 18</div></div>
+  <div class="content grid g2" style="gap:6mm">
+    <div><figure class="shot"><img src="img/02_signin.png" alt="Sign in page"></figure><figcaption>Fig 2. Authentication gateway with email verification and password recovery support.</figcaption>
+      <p style="margin-top:3.5mm;font-size:9.6pt">Users authenticate with their institutional email. The backend issues <b>HTTP-only session &amp; refresh cookies</b> plus a CSRF token, and routes each user to their role-specific workspace.</p></div>
+    <div><figure class="shot"><img src="img/03_dashboard.png" alt="Admin overview dashboard"></figure><figcaption>Fig 3. Signed-in College Admin dashboard ("Welcome back, Sushant") showing live database metrics.</figcaption>
+      <p style="margin-top:3.5mm;font-size:9.6pt">Displays live records from Dayleaf University: <b>33 published sessions</b> across 1 published timetable, <b>11 faculty</b> (10 sections in scope), <b>10 students</b> across 4 departments, and <b>8.7% room utilization</b> across 15 rooms, plus quick-access links.</p></div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 8. TIMETABLE PLANNER ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">06 &middot; Core Module &mdash; Inside Schedule Studio</div><h2>Timetable planner &amp; constraint optimizer</h2></div><div class="page-num">Page 8 of 18</div></div>
+  <div class="content shot-row">
+    <div><figure class="shot"><img src="img/04_timetable.png" alt="Timetable planner"></figure><figcaption>Fig 4. Schedule Studio showing CSE Master Timetable 2026-27 (Published &middot; V2) across Monday&ndash;Friday.</figcaption></div>
+    <div class="explain">
+      <h3>Left Panel: Constraint Optimizer</h3><p>Select the <b>Academic term</b> (Fall Semester 2026-27), <b>Department</b> (Computer Science &amp; Engineering &middot; CSE), optional <b>Section</b> filter, and teaching days.</p>
+      <h3>Right Panel: Saved Schedule Grid</h3><p>Displays the weekly grid by period (09:00, 10:00, 11:00&hellip;) and weekday. Each card lists the <b>Subject, Section, Room and Faculty</b> &mdash; for example: <i>Data Structures &amp; Algorithms &middot; A &middot; Audi-2 (Seminar Hall A) &middot; Prof. Arjun Menon</i>.</p>
+      <h3>Multi-Period Labs</h3><p>2-period laboratory blocks (Data Structures Lab in VLSI Lab, DBMS Lab in Cyber Security &amp; SOC Lab) are automatically placed in consecutive slots.</p>
+      <h3>Version Control &amp; CSV Export</h3><p>Every generated schedule is stored as a numbered version (V1, V2&hellip;) and can be exported to CSV in one click.</p>
+    </div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 9. FULL TIMETABLE VIEW ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">06 &middot; Core Module &mdash; Full Page View</div><h2>Complete planner controls &amp; full weekly matrix</h2></div><div class="page-num">Page 9 of 18</div></div>
+  <div class="content" style="display:flex;gap:6mm">
+    <figure class="shot crop" style="flex:1.65;height:148mm"><img src="img/04b_timetable_full.png" alt="Full timetable page"></figure>
+    <div class="explain" style="flex:1">
+      <h3>Inside the full planner</h3>
+      <ul class="clean" style="margin-top:2mm">
+        <li><b>Teaching days selector:</b> Weekdays (5 days), All 7 days, or custom day checkboxes.</li>
+        <li><b>Periods per day:</b> Configurable daily slots and lunch/break windows.</li>
+        <li><b>Generate a new version (CP-SAT):</b> Runs the solver and saves a fresh conflict-free draft while keeping the published timetable live.</li>
+        <li><b>Drag-and-drop rescheduling:</b> Move any class card to a new slot; Dayleaf validates constraints live.</li>
+        <li><b>Auto-repair:</b> If a manual move introduces a conflict, the optimizer repairs it automatically.</li>
+        <li><b>Approval workflow:</b> HODs submit drafts to the review queue; College Admins approve and publish.</li>
+      </ul>
+      <div class="quote" style="margin-top:5mm;font-size:9.8pt">Every single slot in CSE Master Timetable V2 satisfies room capacity, lab type, faculty availability and section non-overlap rules.</div>
+    </div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 10. AI PLANNER ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">07 &middot; Artificial Intelligence Module</div><h2>AI planner &mdash; conversational campus copilot</h2></div><div class="page-num">Page 10 of 18</div></div>
+  <div class="content shot-row">
+    <div><figure class="shot"><img src="img/05_ai_planner.png" alt="AI planner"></figure><figcaption>Fig 5. Dayleaf AI Planner workspace scoped to Fall Semester 2026-27 and Computer Science &amp; Engineering.</figcaption></div>
+    <div class="explain">
+      <h3>1. Choose Context</h3><p>Pick the academic term and department so the assistant answers using live records from that exact scope.</p>
+      <h3>2. Ask Naturally</h3>
+      <ul class="clean" style="margin-top:1mm">
+        <li>"Generate a timetable for this term"</li>
+        <li>"Find a free room on Wednesday afternoon"</li>
+        <li>"Which faculty members have a heavy teaching load?"</li>
+        <li>"Explain hard vs. soft scheduling constraints"</li>
+      </ul>
+      <h3>3. Review &amp; Confirm</h3><p>Dayleaf AI proposals are <b>advisory</b> &mdash; any draft generation requires explicit user confirmation and passes through the same CP-SAT hard constraints, RBAC permissions and audit log.</p>
+      <h3>4. Multi-Model Resilience</h3><p>Automatic fallback chain across Gemini models plus deterministic guided replies guarantees the assistant never hangs.</p>
+    </div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 11. ACADEMICS PART 1 ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">08 &middot; Inside Academics Workspace (Part 1)</div><h2>Departments, academic terms &amp; semesters</h2></div><div class="page-num">Page 11 of 18</div></div>
+  <div class="content grid g2" style="gap:5mm 6mm">
+    <div><figure class="shot crop" style="height:63mm"><img src="img/06_0_departments_crop.png" alt="Departments tab"></figure><figcaption>Fig 6. Departments tab &mdash; CSE, Cybersecurity (CYS), Data Science &amp; AI (DS), and Electronics &amp; Communication (ECE).</figcaption></div>
+    <div><figure class="shot crop" style="height:63mm"><img src="img/06_1_academic_terms_crop.png" alt="Academic terms tab"></figure><figcaption>Fig 7. Academic terms tab &mdash; Fall Semester 2026-27 (current) and Spring Semester 2026-27.</figcaption></div>
+    <div><figure class="shot crop" style="height:63mm"><img src="img/06_3_semesters_crop.png" alt="Semesters tab"></figure><figcaption>Fig 8. Semesters tab &mdash; maps semester numbers across departments and academic terms.</figcaption></div>
+    <div class="card soft" style="display:flex;flex-direction:column;justify-content:center">
+      <span class="tag" style="align-self:flex-start">Academic Foundation</span>
+      <h3>How the academic hierarchy is organized</h3>
+      <ul class="clean" style="margin-top:2mm">
+        <li><b>Departments:</b> Each department has a full name and short code (CSE, CYS, DS, ECE) and scopes its own courses, sections and HOD.</li>
+        <li><b>Academic Terms:</b> Defines the active semester window so multiple terms can coexist without mixing schedules.</li>
+        <li><b>Semesters:</b> Links each department to its active semester cohorts (Semester 1, 3, 5&hellip;).</li>
+        <li><b>CSV Template &amp; Bulk Import:</b> Every tab provides a one-click CSV template download and bulk import button.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 12. ACADEMICS PART 2 ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">08 &middot; Inside Academics Workspace (Part 2)</div><h2>Subjects, sections &amp; weekly teaching assignments</h2></div><div class="page-num">Page 12 of 18</div></div>
+  <div class="content grid g2" style="gap:5mm 6mm">
+    <div><figure class="shot crop" style="height:63mm"><img src="img/06_2_subjects_crop.png" alt="Subjects tab"></figure><figcaption>Fig 9. Subjects tab &mdash; 18 courses with subject code (CS201, CS202&hellip;), weekly sessions and classroom/lab requirement.</figcaption></div>
+    <div><figure class="shot crop" style="height:63mm"><img src="img/06_4_sections_crop.png" alt="Sections tab"></figure><figcaption>Fig 10. Sections tab &mdash; 10 student sections (A, B&hellip;) with enrollment strength (60&ndash;65 students) used for room-capacity checks.</figcaption></div>
+    <div><figure class="shot crop" style="height:63mm"><img src="img/06_5_teaching_assignments_crop.png" alt="Teaching assignments tab"></figure><figcaption>Fig 11. Teaching assignments tab &mdash; 23 bindings linking Subject + Section + Faculty + Sessions/week + Period length.</figcaption></div>
+    <div class="card soft" style="display:flex;flex-direction:column;justify-content:center">
+      <span class="tag" style="align-self:flex-start">Direct Input to Solver</span>
+      <h3>Why Teaching Assignments drive the optimizer</h3>
+      <ul class="clean" style="margin-top:2mm">
+        <li><b>Subjects</b> specify whether a course needs a standard <b>Classroom</b> or a specialized <b>Laboratory</b>.</li>
+        <li><b>Sections</b> record the exact student headcount so the solver never places a 65-student batch into a 50-seat room.</li>
+        <li><b>Teaching Assignments</b> bind a professor to a subject and section with session count and period duration (1 period for lectures, 2 consecutive periods for labs).</li>
+      </ul>
+    </div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 13. CLASSROOMS + PEOPLE ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">09 &middot; Inside Classrooms &amp; People Workspaces</div><h2>Smart classrooms, specialized labs, faculty, HODs &amp; students</h2></div><div class="page-num">Page 13 of 18</div></div>
+  <div class="content grid g2" style="gap:5mm 6mm">
+    <div><figure class="shot crop" style="height:63mm"><img src="img/07_classrooms_crop.png" alt="Classrooms and labs"></figure><figcaption>Fig 12. Classrooms &amp; labs &mdash; 15 venues (AI &amp; Deep Learning Lab, Cyber Security &amp; SOC Lab, Audi-1 250 seats, Turing Hall&hellip;).</figcaption></div>
+    <div><figure class="shot crop" style="height:63mm"><img src="img/08_0_faculty_crop.png" alt="Faculty roster"></figure><figcaption>Fig 13. People &rarr; Faculty &mdash; 11 professors with department, weekly period cap (18), availability editor &amp; account status.</figcaption></div>
+    <div><figure class="shot crop" style="height:63mm"><img src="img/08_1_students_crop.png" alt="Students roster"></figure><figcaption>Fig 14. People &rarr; Students &mdash; 10 enrolled students with roll numbers, assigned section and portal access controls.</figcaption></div>
+    <div><figure class="shot crop" style="height:63mm"><img src="img/08_2_department_heads_crop.png" alt="Department heads"></figure><figcaption>Fig 15. People &rarr; Department Heads (HODs) &mdash; 4 HOD accounts with department-scoped management permissions.</figcaption></div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 14. ANALYTICS + AUDIT + SETTINGS ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">10 &middot; Inside Insights Workspaces</div><h2>Analytics, tamper-evident audit log &amp; campus settings</h2></div><div class="page-num">Page 14 of 18</div></div>
+  <div class="content grid g3" style="gap:5mm">
+    <div><figure class="shot"><img src="img/09_analytics.png" alt="Analytics workspace"></figure><figcaption>Fig 16. Analytics &amp; operational CSV reports.</figcaption>
+      <p style="margin-top:3mm;font-size:9.3pt">Shows <b>sessions by day</b> (Mon 8, Tue 6, Wed 6, Thu 7, Fri 6), <b>faculty session load</b> (Dr. Rohan Shah 11, Prof. Arjun Menon 10, Dr. Kavya Iyer 8, Prof. Sneha Verma 4), conflict verification status, and downloadable CSV reports.</p></div>
+    <div><figure class="shot"><img src="img/10_audit.png" alt="Audit log"></figure><figcaption>Fig 17. Audit log with action filters.</figcaption>
+      <p style="margin-top:3mm;font-size:9.3pt">Every timetable generation, edit, approval, publication and account change is recorded with actor, action type, entity and timestamp &mdash; providing complete administrative accountability.</p></div>
+    <div><figure class="shot"><img src="img/11_settings.png" alt="Settings workspace"></figure><figcaption>Fig 18. Settings &amp; notification preferences.</figcaption>
+      <p style="margin-top:3mm;font-size:9.3pt">Allows users to update their profile display name, configure campus-wide scheduling defaults, and toggle email/in-app notification preferences for schedule and approval updates.</p></div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 15. STUDENT + FACULTY PORTALS ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">11 &middot; Inside Personal Role Portals</div><h2>Dedicated views for students and faculty</h2></div><div class="page-num">Page 15 of 18</div></div>
+  <div class="content grid g2" style="gap:4.5mm 6mm">
+    <div><figure class="shot crop" style="height:63mm"><img src="img/12_student_overview.png" alt="Student overview"></figure><figcaption>Fig 19. Student Overview (Aarav Sharma) &mdash; summary of published classes and unread updates.</figcaption></div>
+    <div><figure class="shot crop" style="height:63mm"><img src="img/13_student_timetable.png" alt="Student timetable"></figure><figcaption>Fig 20. Student "My timetable" &mdash; clean read-only weekly grid for his section with room names.</figcaption></div>
+    <div><figure class="shot crop" style="height:63mm"><img src="img/14_faculty_overview.png" alt="Faculty overview"></figure><figcaption>Fig 21. Faculty Overview (Prof. Arjun Menon) &mdash; personal teaching load summary and quick links.</figcaption></div>
+    <div><figure class="shot crop" style="height:63mm"><img src="img/15_faculty_timetable.png" alt="Faculty timetable"></figure><figcaption>Fig 22. Faculty "My timetable" &mdash; shows only his assigned lectures and 2-period lab sessions.</figcaption></div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 16. CYBER SECURITY + TESTING ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">12 &middot; Cyber Security &amp; Verification</div><h2>Security architecture &amp; automated test results</h2></div><div class="page-num">Page 16 of 18</div></div>
+  <div class="content">
+    <div class="grid g4">
+      <div class="card soft"><div class="num">50 / 50</div><p>Automated backend pytest tests passing</p></div>
+      <div class="card soft"><div class="num">5 Roles</div><p>Super Admin, College Admin, HOD, Faculty, Student</p></div>
+      <div class="card soft"><div class="num">0 Clashes</div><p>Across all 33 published CSE sessions</p></div>
+      <div class="card soft"><div class="num">100%</div><p>TypeScript type-check &amp; API health verified</p></div>
+    </div>
+    <div class="grid g2" style="margin-top:6mm;gap:6mm">
+      <div class="card">
+        <span class="tag">B.Tech CSE (Cyber Security) Engineering</span>
+        <h3>Defensive security controls implemented</h3>
+        <ul class="clean" style="margin-top:2mm">
+          <li><b>Role-Based Access Control (RBAC):</b> Every endpoint verifies the user's role and `institution_id` so students/faculty can never modify campus records.</li>
+          <li><b>HTTP-Only Session &amp; Refresh Cookies:</b> JWT tokens are stored in `HttpOnly` cookies (inaccessible to XSS scripts) with rotating refresh token families.</li>
+          <li><b>CSRF Double-Submit HMAC:</b> All state-changing requests (`POST`, `PUT`, `PATCH`, `DELETE`) verify `X-CSRF-Token` using constant-time `hmac.compare_digest`.</li>
+          <li><b>Password Hashing &amp; Rate Limiting:</b> Passwords hashed via `pwdlib` (Argon2/recommended); authentication routes protected against brute-force attempts.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="tag">Stage 5 &middot; Test Results</span>
+        <h3>Automated verification suite</h3>
+        <table class="data" style="margin-top:2mm">
+          <thead><tr><th>Test Suite</th><th>What is Verified</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Authentication &amp; Tokens</td><td>Sign-up, sign-in, refresh rotation, revocation</td><td>&check; Passed</td></tr>
+            <tr><td>RBAC &amp; Tenant Isolation</td><td>Cross-role &amp; cross-institution access blocked</td><td>&check; Passed</td></tr>
+            <tr><td>CP-SAT Timetable Solver</td><td>Room, faculty, section, capacity &amp; lab rules</td><td>&check; Passed</td></tr>
+            <tr><td>CSRF &amp; Origin Guards</td><td>Missing/invalid CSRF or disallowed origin rejected</td><td>&check; Passed</td></tr>
+            <tr><td>Dayleaf AI Assistant</td><td>Gemini integration, fallback &amp; confirm flow</td><td>&check; Passed</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 17. FUTURE + CONCLUSION ============ -->
+<section class="page">
+  <div class="page-head"><div><div class="kicker">13 &middot; Future Scope &amp; Conclusion</div><h2>Where Dayleaf goes next</h2></div><div class="page-num">Page 17 of 18</div></div>
+  <div class="content grid g2" style="gap:8mm">
+    <div>
+      <h3>Future Enhancements</h3>
+      <div class="grid g2" style="margin-top:3mm;gap:4mm">
+        <div class="card"><h3>Mobile Companion App</h3><p style="font-size:9.3pt">Instant push notifications for room swaps and extra classes on Android &amp; iOS.</p></div>
+        <div class="card"><h3>Smart Substitute Finder</h3><p style="font-size:9.3pt">Automatically recommend available, domain-matched faculty when a teacher takes leave.</p></div>
+        <div class="card"><h3>IoT &amp; Biometric Sync</h3><p style="font-size:9.3pt">Release unused room bookings automatically by linking with smart attendance sensors.</p></div>
+        <div class="card"><h3>Exam &amp; Invigilation Solver</h3><p style="font-size:9.3pt">Extend the CP-SAT engine to semester exam seating and invigilator duty rosters.</p></div>
+        <div class="card"><h3>Elective Bidding Portal</h3><p style="font-size:9.3pt">Let students pick NEP open electives first, then solve the schedule for minimum clash.</p></div>
+        <div class="card"><h3>Multi-Campus Cloud</h3><p style="font-size:9.3pt">Deploy on Vercel + managed PostgreSQL to serve multiple university campuses.</p></div>
+      </div>
+    </div>
+    <div>
+      <h3>Project Conclusion</h3>
+      <p style="margin-top:3mm">Through the five stages of <b>Design Thinking</b> (Empathize, Define, Ideate, Prototype, Test), our team identified a universal problem in higher education and engineered <b>Dayleaf</b> &mdash; a complete, working AI timetable manager.</p>
+      <ul class="clean" style="margin-top:4mm">
+        <li>Reduces timetable preparation from <b>weeks of manual Excel work to seconds</b>.</li>
+        <li>Guarantees <b>zero room, faculty or section clashes</b> through mathematical constraint solving.</li>
+        <li>Makes campus planning accessible through a <b>natural-language Gemini AI Copilot</b>.</li>
+        <li>Delivers <b>dedicated, secure portals</b> for Admins, HODs, Faculty and Students.</li>
+        <li>Embeds <b>Cyber Security best practices</b> (RBAC, CSRF HMAC, HTTP-only cookies, audit logs).</li>
+      </ul>
+      <div class="quote" style="margin-top:5mm">Dayleaf transforms university timetable management from a stressful manual bottleneck into an intelligent, transparent and clash-free system.</div>
+    </div>
+  </div>
+  <div class="page-foot"><span>Dayleaf &mdash; AI Timetable Manager</span><span>Submitted to Dr. Harinee S &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</span></div>
+</section>
+
+<!-- ============ 18. SUBMISSION ============ -->
+<section class="page final">
+  <div class="logo-wrap"><img src="img/jain_logo.png" alt="JAIN (Deemed-to-be University)"></div>
+  <h2>Thank You</h2>
+  <div class="sub">Dayleaf &mdash; AI Timetable Manager &middot; Design and Thinking &middot; B.Tech CSE (Cyber Security)</div>
+  <div class="sub-box">
+    <div class="b">
+      <small>Submitted to</small>
+      <div class="big">Dr. Harinee S</div>
+      <div class="names" style="margin-top:2.5mm">Course: Design and Thinking<br>Department of CSE (Cyber Security)<br>JAIN (Deemed-to-be University)</div>
+    </div>
+    <div class="b">
+      <small>Submitted by &mdash; Team Members</small>
+      <div class="names">
+        1. Rudrakadh Chadha &mdash; 25BTRCC045<br>
+        2. Sakthivel M &mdash; 25BTRCC048<br>
+        3. Sushant Prakash &mdash; 25BTRCC053<br>
+        4. Sudhanshu Kumar &mdash; 25BTRCC052<br>
+        5. Hrishit Chaudhary &mdash; 25BTRCC025<br>
+        6. Mohamed Badreldin &mdash; 25BTRCC061
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

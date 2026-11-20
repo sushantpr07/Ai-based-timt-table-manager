@@ -1,0 +1,18 @@
+[Unit]
+Description=CampusFlow public health monitor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=campusflow-monitor
+Group=campusflow-monitor
+WorkingDirectory=/opt/campusflow
+EnvironmentFile=/etc/campusflow/monitor.env
+Environment=CAMPUSFLOW_MONITOR_STATE=/var/lib/campusflow-monitor/state.json
+ExecStart=/usr/bin/node /opt/campusflow/scripts/monitor-production.mjs
+StateDirectory=campusflow-monitor
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true

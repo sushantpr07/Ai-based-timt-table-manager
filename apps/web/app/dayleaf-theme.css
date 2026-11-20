@@ -1,0 +1,771 @@
+/* ==========================================================================
+   DAYLEAF PREMIUM THEME — OBSIDIAN & ELECTRIC VIOLET
+   Inspired by the uploaded wave ribbon & deep purple gradient aesthetic
+   ========================================================================== */
+
+:root {
+  --dayleaf-bg: #06020c;
+  --dayleaf-surface: #0e061b;
+  --dayleaf-card: rgba(22, 10, 39, 0.72);
+  --dayleaf-card-hover: rgba(33, 16, 58, 0.85);
+  --dayleaf-border: rgba(168, 85, 247, 0.22);
+  --dayleaf-border-glow: rgba(168, 85, 247, 0.5);
+  --dayleaf-purple-base: #7c3aed;
+  --dayleaf-purple-bright: #a855f7;
+  --dayleaf-purple-light: #c084fc;
+  --dayleaf-purple-neon: #d946ef;
+  --dayleaf-gradient-hero: linear-gradient(135deg, #a855f7 0%, #7c3aed 45%, #c026d3 100%);
+  --dayleaf-gradient-glow: radial-gradient(circle at 50% 0%, rgba(147, 51, 234, 0.35) 0%, rgba(88, 28, 135, 0.15) 50%, transparent 80%);
+  --dayleaf-text-main: #f5f3ff;
+  --dayleaf-text-muted: #a78bfa;
+  --dayleaf-text-dim: #71698a;
+}
+
+/* Base dark theme override when data-theme is dark (default) */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #f5f3ff;
+  --muted: #a78bfa;
+  --line: rgba(168, 85, 247, 0.18);
+  --paper: #0b0416;
+  --surface: #100720;
+  --brand: #a855f7;
+  --canvas: #06020c;
+}
+
+html[data-theme="dark"] body {
+  background: #06020c;
+  background-image: 
+    radial-gradient(at 15% 10%, rgba(147, 51, 234, 0.18) 0px, transparent 45%),
+    radial-gradient(at 85% 85%, rgba(192, 38, 211, 0.14) 0px, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(88, 28, 135, 0.08) 0px, transparent 65%);
+  background-attachment: fixed;
+  color: #f5f3ff;
+}
+
+html[data-theme="dark"] .main-area {
+  background: transparent;
+}
+
+/* Sidebar styling for Dayleaf Dark */
+html[data-theme="dark"] .sidebar {
+  background: rgba(12, 5, 24, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-right: 1px solid rgba(168, 85, 247, 0.18);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme="dark"] .brand {
+  color: #f5f3ff;
+}
+
+.dayleaf-brand-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.6);
+  flex-shrink: 0;
+}
+
+.dayleaf-brand-title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #ffffff 30%, #e9d5ff 70%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dayleaf-brand-leaf {
+  font-weight: 400;
+  color: #c084fc;
+  -webkit-text-fill-color: #c084fc;
+}
+
+html[data-theme="dark"] .campus-switch {
+  background: rgba(26, 13, 46, 0.6);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] .campus-avatar {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+}
+
+html[data-theme="dark"] .campus-copy b {
+  color: #f5f3ff;
+}
+
+html[data-theme="dark"] .campus-copy small {
+  color: #a78bfa;
+}
+
+html[data-theme="dark"] .nav-label {
+  color: #7c6f96;
+  font-weight: 800;
+}
+
+html[data-theme="dark"] .nav-link {
+  color: #b8a9d6;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-theme="dark"] .nav-link:hover {
+  background: rgba(168, 85, 247, 0.12);
+  color: #f5f3ff;
+  transform: translateX(3px);
+}
+
+html[data-theme="dark"] .nav-link.selected {
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.25) 0%, rgba(124, 58, 237, 0.12) 100%);
+  color: #ffffff;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.25);
+}
+
+html[data-theme="dark"] .nav-link.selected:before {
+  background: #c084fc;
+  box-shadow: 0 0 8px #c084fc;
+}
+
+html[data-theme="dark"] .nav-link svg {
+  color: #a78bfa;
+}
+
+html[data-theme="dark"] .nav-link.selected svg {
+  color: #e9d5ff;
+}
+
+html[data-theme="dark"] .new-tag {
+  background: rgba(168, 85, 247, 0.3);
+  color: #e9d5ff;
+  border: 1px solid rgba(168, 85, 247, 0.5);
+}
+
+html[data-theme="dark"] .topbar {
+  background: rgba(12, 5, 24, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(168, 85, 247, 0.18);
+}
+
+html[data-theme="dark"] .breadcrumbs b {
+  color: #f5f3ff;
+}
+
+html[data-theme="dark"] .search-box {
+  background: rgba(22, 10, 39, 0.8);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  color: #c4b5fd;
+}
+
+html[data-theme="dark"] .search-box:focus-within {
+  border-color: #a855f7;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+}
+
+html[data-theme="dark"] .search-box kbd {
+  background: #1e0f36;
+  border-color: rgba(168, 85, 247, 0.3);
+  color: #d8b4fe;
+}
+
+/* ==========================================================================
+   DAYLEAF HERO LANDING SECTION
+   ========================================================================== */
+
+.dayleaf-hero-container {
+  margin-bottom: 24px;
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  background: #090314;
+  background-image: 
+    radial-gradient(circle at 75% 20%, rgba(168, 85, 247, 0.25) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(124, 58, 237, 0.2) 0%, transparent 60%);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 30px rgba(124, 58, 237, 0.15);
+}
+
+/* Ambient Silk Wave Layer from user image */
+.dayleaf-wave-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/dayleaf-theme-waves.jpg');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.38;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.dayleaf-gradient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(6, 2, 12, 0.4) 0%, rgba(9, 3, 20, 0.85) 75%, #080214 100%);
+  pointer-events: none;
+}
+
+.dayleaf-hero-content {
+  position: relative;
+  z-index: 2;
+  padding: 38px 42px 34px;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 36px;
+  align-items: center;
+}
+
+.dayleaf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 13px;
+  background: rgba(168, 85, 247, 0.16);
+  border: 1px solid rgba(168, 85, 247, 0.45);
+  border-radius: 9999px;
+  color: #e9d5ff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  margin-bottom: 18px;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.25);
+  backdrop-filter: blur(8px);
+}
+
+.dayleaf-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a855f7;
+  box-shadow: 0 0 8px #a855f7;
+  animation: dayleaf-pulse 2s infinite;
+}
+
+@keyframes dayleaf-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.7; }
+}
+
+.dayleaf-hero-title {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  font-size: 38px;
+  line-height: 1.15;
+  letter-spacing: -1.2px;
+  color: #ffffff;
+  margin: 0 0 14px;
+}
+
+.dayleaf-hero-gradient {
+  background: linear-gradient(135deg, #c084fc 0%, #a855f7 50%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  text-shadow: 0 0 30px rgba(168, 85, 247, 0.4);
+}
+
+.dayleaf-hero-sub {
+  font-size: 13px;
+  line-height: 1.65;
+  color: #c4b5fd;
+  margin: 0 0 24px;
+  max-width: 540px;
+}
+
+.dayleaf-hero-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dayleaf-btn-glow {
+  height: 42px;
+  padding: 0 22px;
+  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 50%, #c026d3 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(147, 51, 234, 0.5), 0 4px 14px rgba(0, 0, 0, 0.3);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dayleaf-btn-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 32px rgba(168, 85, 247, 0.7), 0 6px 20px rgba(0, 0, 0, 0.4);
+  filter: brightness(1.1);
+}
+
+.dayleaf-btn-glass {
+  height: 42px;
+  padding: 0 18px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #e9d5ff;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dayleaf-btn-glass:hover {
+  background: rgba(168, 85, 247, 0.16);
+  border-color: rgba(168, 85, 247, 0.55);
+  color: #ffffff;
+}
+
+/* Right side: Interactive Visual Card Hub */
+.dayleaf-hero-visual {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dayleaf-glass-hub {
+  background: rgba(22, 10, 39, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(168, 85, 247, 0.32);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.dayleaf-hub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.dayleaf-hub-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #d8b4fe;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.dayleaf-hub-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 8px #34d399;
+}
+
+.dayleaf-hub-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dayleaf-hub-slot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  background: rgba(12, 5, 24, 0.65);
+  border: 1px solid rgba(168, 85, 247, 0.18);
+  border-radius: 8px;
+  font-size: 10.5px;
+  transition: all 0.2s ease;
+}
+
+.dayleaf-hub-slot:hover {
+  border-color: rgba(168, 85, 247, 0.45);
+  background: rgba(26, 12, 48, 0.7);
+  transform: translateX(2px);
+}
+
+.dayleaf-hub-slot-info {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.dayleaf-slot-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.dot-purple { background: #a855f7; box-shadow: 0 0 6px #a855f7; }
+.dot-cyan { background: #38bdf8; box-shadow: 0 0 6px #38bdf8; }
+.dot-pink { background: #f472b6; box-shadow: 0 0 6px #f472b6; }
+.dot-green { background: #34d399; box-shadow: 0 0 6px #34d399; }
+
+.dayleaf-slot-time {
+  font-weight: 700;
+  color: #e9d5ff;
+}
+
+.dayleaf-slot-title {
+  color: #c4b5fd;
+}
+
+.dayleaf-slot-tag {
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 700;
+  background: rgba(168, 85, 247, 0.18);
+  color: #e9d5ff;
+}
+
+.tag-verified {
+  background: rgba(52, 211, 153, 0.15);
+  color: #6ee7b7;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+/* Floating Badges */
+.dayleaf-floating-stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(14, 6, 26, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.dayleaf-stat-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #9333ea, #7c3aed);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+}
+
+.dayleaf-stat-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.dayleaf-stat-text b {
+  font-size: 11px;
+  color: #ffffff;
+}
+
+.dayleaf-stat-text small {
+  font-size: 9.5px;
+  color: #a78bfa;
+}
+
+/* Feature Pillars strip below hero */
+.dayleaf-pillars-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.dayleaf-pillar-card {
+  padding: 15px 16px;
+  background: rgba(16, 7, 30, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(168, 85, 247, 0.18);
+  border-radius: 12px;
+  transition: all 0.25s ease;
+}
+
+.dayleaf-pillar-card:hover {
+  background: rgba(26, 12, 48, 0.85);
+  border-color: rgba(168, 85, 247, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35), 0 0 16px rgba(147, 51, 234, 0.15);
+}
+
+.dayleaf-pillar-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: #c084fc;
+  display: grid;
+  place-items: center;
+  margin-bottom: 10px;
+}
+
+.dayleaf-pillar-card h4 {
+  margin: 0 0 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #f5f3ff;
+}
+
+.dayleaf-pillar-card p {
+  margin: 0;
+  font-size: 10px;
+  color: #a78bfa;
+  line-height: 1.5;
+}
+
+/* Metric Cards Dayleaf Dark */
+html[data-theme="dark"] .metric-card {
+  background: rgba(16, 7, 30, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(168, 85, 247, 0.18);
+  border-radius: 12px;
+}
+
+html[data-theme="dark"] .metric-number {
+  color: #f5f3ff;
+}
+
+html[data-theme="dark"] .metric-label {
+  color: #a78bfa;
+}
+
+html[data-theme="dark"] .metric-icon.blue {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+}
+
+html[data-theme="dark"] .metric-icon.violet {
+  background: rgba(168, 85, 247, 0.18);
+  color: #c084fc;
+}
+
+html[data-theme="dark"] .metric-icon.green {
+  background: rgba(52, 211, 153, 0.15);
+  color: #34d399;
+}
+
+html[data-theme="dark"] .metric-icon.orange {
+  background: rgba(251, 146, 60, 0.15);
+  color: #fb923c;
+}
+
+/* Schedule Panel & Timetable Grid */
+html[data-theme="dark"] .schedule-panel,
+html[data-theme="dark"] .assistant-card,
+html[data-theme="dark"] .panel {
+  background: rgba(14, 6, 26, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: 14px;
+}
+
+html[data-theme="dark"] .panel-heading h3,
+html[data-theme="dark"] .assistant-card h3 {
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .panel-kicker,
+html[data-theme="dark"] .ai-label {
+  color: #c084fc;
+}
+
+html[data-theme="dark"] .day-header {
+  border-color: rgba(168, 85, 247, 0.15);
+  color: #a78bfa;
+}
+
+html[data-theme="dark"] .day-header b {
+  color: #f5f3ff;
+}
+
+html[data-theme="dark"] .day-header.current-day span {
+  color: #c084fc;
+}
+
+html[data-theme="dark"] .time-label,
+html[data-theme="dark"] .slot {
+  border-color: rgba(168, 85, 247, 0.12);
+  color: #7c6f96;
+}
+
+html[data-theme="dark"] .class-card {
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  border-left-width: 3px;
+  transition: all 0.2s ease;
+}
+
+html[data-theme="dark"] .class-card:hover {
+  transform: scale(1.02);
+  filter: brightness(1.15);
+}
+
+html[data-theme="dark"] .class-card.blue {
+  background: rgba(30, 58, 138, 0.45);
+  border-color: #60a5fa;
+  color: #dbeafe;
+}
+
+html[data-theme="dark"] .class-card.violet {
+  background: rgba(88, 28, 135, 0.45);
+  border-color: #c084fc;
+  color: #f3e8ff;
+}
+
+html[data-theme="dark"] .class-card.amber {
+  background: rgba(120, 53, 15, 0.45);
+  border-color: #fbbf24;
+  color: #fef3c7;
+}
+
+html[data-theme="dark"] .class-card.green {
+  background: rgba(6, 78, 59, 0.45);
+  border-color: #34d399;
+  color: #d1fae5;
+}
+
+html[data-theme="dark"] .class-card.rose {
+  background: rgba(136, 19, 55, 0.45);
+  border-color: #fb7185;
+  color: #ffe4e6;
+}
+
+html[data-theme="dark"] .class-card.cyan {
+  background: rgba(22, 78, 99, 0.45);
+  border-color: #38bdf8;
+  color: #e0f2fe;
+}
+
+/* Assistant Chat Dayleaf Dark */
+html[data-theme="dark"] .assistant-thread {
+  background: rgba(9, 3, 18, 0.7);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+html[data-theme="dark"] .assistant-mini {
+  background: rgba(168, 85, 247, 0.25);
+  color: #e9d5ff;
+}
+
+html[data-theme="dark"] .assistant-message p {
+  color: #c4b5fd;
+}
+
+html[data-theme="dark"] .assistant-message b {
+  color: #f5f3ff;
+}
+
+html[data-theme="dark"] .assistant-answer {
+  background: rgba(124, 58, 237, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #f5f3ff;
+}
+
+html[data-theme="dark"] .suggestions button {
+  background: rgba(22, 10, 42, 0.7);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  color: #d8b4fe;
+}
+
+html[data-theme="dark"] .suggestions button:hover {
+  background: rgba(168, 85, 247, 0.2);
+  border-color: rgba(168, 85, 247, 0.45);
+  color: #ffffff;
+}
+
+html[data-theme="dark"] .assistant-input {
+  background: rgba(16, 7, 30, 0.9);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+}
+
+html[data-theme="dark"] .assistant-input:focus-within {
+  border-color: #a855f7;
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.35);
+}
+
+html[data-theme="dark"] .assistant-input input {
+  color: #f5f3ff;
+}
+
+html[data-theme="dark"] .assistant-input button {
+  background: linear-gradient(135deg, #9333ea, #7c3aed);
+  box-shadow: 0 0 10px rgba(147, 51, 234, 0.4);
+}
+
+/* Buttons in main app */
+.button-primary {
+  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%) !important;
+  border-color: rgba(168, 85, 247, 0.4) !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 16px rgba(147, 51, 234, 0.4) !important;
+}
+
+.button-primary:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 0 22px rgba(168, 85, 247, 0.6) !important;
+}
+
+html[data-theme="dark"] .button-quiet {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(168, 85, 247, 0.25);
+  color: #d8b4fe;
+}
+
+html[data-theme="dark"] .button-quiet:hover {
+  background: rgba(168, 85, 247, 0.15);
+  color: #ffffff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 980px) {
+  .dayleaf-hero-content {
+    grid-template-columns: 1fr;
+    padding: 28px 24px;
+    gap: 24px;
+  }
+  .dayleaf-hero-title {
+    font-size: 30px;
+  }
+  .dayleaf-pillars-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .dayleaf-hero-title {
+    font-size: 24px;
+  }
+  .dayleaf-pillars-strip {
+    grid-template-columns: 1fr;
+  }
+}

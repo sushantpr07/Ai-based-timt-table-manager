@@ -1,0 +1,10 @@
+CampusFlow baseline schema migration.
+
+The initial revision creates the current mapped schema for a new installation. Once this
+revision has been applied to a shared or deployed database, treat it as immutable. The
+email-verification, timetable-approval, and notification-preference revisions are conditional so they also upgrade
+databases created before those features. For subsequent model changes, generate a new revision with
+`alembic revision --autogenerate` and review the operations before applying them.
+Installations created with AUTO_CREATE_SCHEMA=true can record the baseline with
+`alembic stamp 0001_initial` after checking the core schema, then run `alembic upgrade head`
+to apply any revisions newer than that baseline.
