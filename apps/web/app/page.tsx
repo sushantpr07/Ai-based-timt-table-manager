@@ -93,7 +93,7 @@ export default function Home() {
   }
 
   const roleNavGroups = viewer && ["faculty", "student"].includes(viewer.role)
-    ? [{ title: "My workspace", items: [["Overview", LayoutDashboard], ["Timetable", CalendarDays], ["Notifications", Bell], ["Settings", Settings2]] as const }]
+    ? [{ title: "My workspace", items: [["Overview", LayoutDashboard], ["Timetable", CalendarDays], ["Department", GraduationCap], ["Notifications", Bell], ["Settings", Settings2]] as const }]
     : viewer ? [...navGroups, { title: "Updates", items: [["Notifications", Bell]] as const }]
       : navGroups;
   const searchItems = roleNavGroups.flatMap(group => group.items
@@ -193,7 +193,7 @@ export default function Home() {
       </header>
       <div className="page-content">
         {notice && <div className="notice" role="status"><Check size={17}/><span>{notice}</span><button aria-label="Dismiss notification" onClick={() => setNotice("")}><X size={15}/></button></div>}
-        {!viewer && active !== "Overview" ? <section className="workspace-access panel"><span className="panel-kicker">DAYLEAF WORKSPACE</span><h1>{authChecked ? `Sign in to open ${active}` : "Checking your session…"}</h1><p>{authChecked ? "Sign in to manage real campus data. The preview gives you a live tour of Dayleaf Studio." : "Loading your campus workspace…"}</p>{authChecked && <div className="placeholder-actions"><Link className="button button-primary" href="/sign-in">Sign in <ArrowRight size={15}/></Link><Link className="button button-quiet" href="/sign-up">Create campus workspace</Link><button className="button button-quiet" onClick={() => setActive("Overview")}><ArrowLeft size={14}/> Preview</button></div>}</section> : viewer && ["faculty", "student"].includes(viewer.role) && active !== "Settings" ? <PersonalWorkspace active={active} role={viewer.role as "faculty" | "student"} fullName={viewer.full_name} onNavigate={setActive}/> : viewer && active === "Overview" ? <DashboardWorkspace fullName={viewer.full_name} onNavigate={setActive}/> : active === "AI planner" ? <AssistantWorkspace onNavigate={setActive}/> : active === "Overview" ? <>
+        {!viewer && active !== "Overview" ? <section className="workspace-access panel"><span className="panel-kicker">DAYLEAF WORKSPACE</span><h1>{authChecked ? `Sign in to open ${active}` : "Checking your session…"}</h1><p>{authChecked ? "Sign in to manage real campus data. The preview gives you a live tour of Dayleaf Studio." : "Loading your campus workspace…"}</p>{authChecked && <div className="placeholder-actions"><Link className="button button-primary" href="/sign-in">Sign in <ArrowRight size={15}/></Link><Link className="button button-quiet" href="/sign-up">Create campus workspace</Link><button className="button button-quiet" onClick={() => setActive("Overview")}><ArrowLeft size={14}/> Preview</button></div>}</section> : viewer && ["faculty", "student"].includes(viewer.role) && active !== "Settings" ? <PersonalWorkspace active={active} role={viewer.role as "faculty" | "student"} fullName={viewer.full_name} viewer={viewer} onNavigate={setActive}/> : viewer && active === "Overview" ? <DashboardWorkspace fullName={viewer.full_name} onNavigate={setActive}/> : active === "AI planner" ? <AssistantWorkspace onNavigate={setActive}/> : active === "Overview" ? <>
         
         {/* DAYLEAF PREMIUM HERO LANDING PAGE */}
         <section className="dayleaf-hero-container">

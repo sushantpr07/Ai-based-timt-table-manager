@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Bell, CalendarDays, Check, Clock3, ExternalLink, GraduationCap, RefreshCw } from "lucide-react";
+import { Bell, BookOpen, CalendarDays, Check, Clock3, ExternalLink, GraduationCap, RefreshCw } from "lucide-react";
 import { apiFetch } from "./api-client";
 import { useCampusEvents } from "./useCampusEvents";
 
@@ -9,7 +9,7 @@ type PersonalEntry = { id: string; timetable: string; version: number; term_id: 
 type Notice = { id: string; title: string; body: string; read: boolean; created_at: string };
 const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-export default function PersonalWorkspace({ active, role, fullName, onNavigate }: { active: string; role: "faculty" | "student"; fullName: string; onNavigate: (section: string) => void }) {
+export default function PersonalWorkspace({ active, role, fullName, viewer, onNavigate }: { active: string; role: "faculty" | "student"; fullName: string; viewer?: any; onNavigate: (section: string) => void }) {
   const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
   const [entries, setEntries] = useState<PersonalEntry[]>([]);
   const [notifications, setNotifications] = useState<Notice[]>([]);
@@ -72,6 +72,64 @@ export default function PersonalWorkspace({ active, role, fullName, onNavigate }
   if (active === "Notifications") return <section className="personal-panel panel"><div className="personal-heading"><div><span className="panel-kicker">YOUR CAMPUS UPDATES</span><h2><Bell size={20}/> Notifications {unread > 0 && <span className="unread-count">{unread}</span>}</h2><p>Schedule changes and campus updates sent to you.</p></div>{unread > 0 && <button className="button button-quiet" onClick={() => void markAllRead()}><Check size={14}/> Mark all read</button>}</div>{error && <div className="notice error-notice">{error}</div>}{loading ? <div className="personal-empty">Loading your notifications…</div> : notifications.length ? <div className="notification-list">{notifications.map(item => <article key={item.id} className={`notification-item ${item.read ? "read" : "unread"}`} onClick={() => void markRead(item)}><span className="notification-icon"><Bell size={16}/></span><div><b>{item.title}</b><p>{item.body}</p><small>{new Date(item.created_at).toLocaleString()}</small></div><button aria-label="Mark as read" onClick={event => { event.stopPropagation(); void markRead(item); }}>{item.read ? <Check size={15}/> : <span className="unread-dot"/>}</button></article>)}</div> : <div className="personal-empty"><Bell size={22}/><b>You’re all caught up</b><small>New timetable announcements will show up here.</small></div>}</section>;
 
   if (active === "Settings") return <section className="personal-panel panel"><div className="personal-heading"><div><span className="panel-kicker">ACCOUNT PREFERENCES</span><h2>Settings</h2><p>Signed in as {fullName}. Notification and profile preferences are next in the rollout.</p></div></div><div className="settings-preview"><Bell size={18}/><span><b>Timetable announcements</b><small>We’ll show schedule updates in your Dayleaf notifications.</small></span><span className="enabled-pill">On</span></div></section>;
+
+  if (active === "Department") {
+    const deptName = viewer?.department || meta.department || "Computer Science & Engineering";
+    const deptCode = viewer?.department_code || meta.department_code || "CSE";
+    const secName = viewer?.section || meta.section || "A";
+    const semNum = viewer?.semester || meta.semester || 3;
+    const rollNum = viewer?.student_number || meta.student_number || "DL2026CSE001";
+
+    return (
+      <section className="personal-panel panel">
+        <div className="personal-heading">
+          <div>
+            <span className="panel-kicker">ACADEMIC DEPARTMENT</span>
+            <h2><GraduationCap size={22}/> {deptName} ({deptCode})</h2>
+            <p>Your department details, enrolled section, and academic faculty.</p>
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginTop: "20px" }}>
+          <div className="stat-card" style={{ padding: "18px", borderRadius: "12px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <small style={{ color: "#94a3b8", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.05em" }}>DEPARTMENT</small>
+            <h3 style={{ fontSize: "18px", margin: "6px 0 2px 0", color: "#f8fafc" }}>{deptName}</h3>
+            <span style={{ fontSize: "12px", color: "#c084fc", fontWeight: 600 }}>Code: {deptCode}</span>
+          </div>
+
+          <div className="stat-card" style={{ padding: "18px", borderRadius: "12px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <small style={{ color: "#94a3b8", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.05em" }}>ENROLLED CLASS</small>
+            <h3 style={{ fontSize: "18px", margin: "6px 0 2px 0", color: "#f8fafc" }}>Semester {semNum} · Section {secName}</h3>
+            <span style={{ fontSize: "12px", color: "#60a5fa", fontWeight: 600 }}>Academic Year 2026-27</span>
+          </div>
+
+          <div className="stat-card" style={{ padding: "18px", borderRadius: "12px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <small style={{ color: "#94a3b8", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.05em" }}>STUDENT IDENTITY</small>
+            <h3 style={{ fontSize: "18px", margin: "6px 0 2px 0", color: "#f8fafc" }}>{fullName}</h3>
+            <span style={{ fontSize: "12px", color: "#34d399", fontWeight: 600 }}>Roll No: {rollNum}</span>
+          </div>
+
+          <div className="stat-card" style={{ padding: "18px", borderRadius: "12px", background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <small style={{ color: "#94a3b8", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.05em" }}>HEAD OF DEPARTMENT (HOD)</small>
+            <h3 style={{ fontSize: "18px", margin: "6px 0 2px 0", color: "#f8fafc" }}>
+              {deptCode === "CSE" ? "Dr. Rajesh Raman" : deptCode === "CYS" ? "Dr. Aditi Rao" : deptCode === "DS" ? "Dr. Neha Kulkarni" : "Dr. Vikram Malhotra"}
+            </h3>
+            <span style={{ fontSize: "12px", color: "#e2e8f0" }}>hod.{deptCode.toLowerCase()}@dayleaf.edu</span>
+          </div>
+        </div>
+
+        <div style={{ marginTop: "24px", padding: "18px", borderRadius: "12px", background: "rgba(168, 85, 247, 0.05)", border: "1px solid rgba(168, 85, 247, 0.2)" }}>
+          <h4 style={{ margin: "0 0 8px 0", fontSize: "15px", color: "#c084fc", display: "flex", alignItems: "center", gap: "8px" }}>
+            <BookOpen size={16}/> Enrolled Department Curriculum ({deptCode} Semester {semNum})
+          </h4>
+          <p style={{ margin: 0, fontSize: "13px", color: "#94a3b8", lineHeight: 1.6 }}>
+            Your class schedule is automatically synchronized with the department master timetable generated by the Dayleaf constraint solver. 
+            All lectures, lab sessions, and classroom allocations (Section {secName}) are updated in real-time.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return <section className="personal-workspace">
     <div className="personal-heading">
