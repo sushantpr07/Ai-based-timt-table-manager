@@ -13,7 +13,12 @@ export default function SignIn() {
     const form = new FormData(event.currentTarget);
     try { const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
       const res = await apiFetch(`${base}/auth/sign-in`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: form.get("email"), password: form.get("password") }) });
-      if (!res.ok) throw new Error((await res.json()).detail ?? "Could not sign in."); window.location.href = "/";
+      if (!res.ok) throw new Error((await res.json()).detail ?? "Could not sign in.");
+      const userData = await res.json();
+      if (typeof window !== "undefined" && userData) {
+        localStorage.setItem("dayleaf_user", JSON.stringify(userData));
+      }
+      window.location.href = "/";
     } catch (e) { const message = (e as Error).message.includes("fetch") ? "Dayleaf API is offline. Start the API and try again." : (e as Error).message; setError(message); setVerificationNeeded(message.startsWith("Verify your email")); } finally { setBusy(false); }
   }
   async function resendVerification() { setResent(false); try { const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1"; const response = await apiFetch(`${base}/auth/resend-verification`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) }); if (!response.ok) throw new Error("Could not request a verification link."); setResent(true); } catch { setError("Could not request a verification link. Please try again."); } }

@@ -16,7 +16,8 @@ export function resolveApiUrl(raw: RequestInfo | URL): string {
     if (host.endsWith(".trycloudflare.com") || window.location.protocol === "https:") {
       return urlStr
         .replace(/^https?:\/\/localhost:8000\/api\/v1/, `${window.location.origin}/api/v1`)
-        .replace(/^https?:\/\/127\.0\.0\.1:8000\/api\/v1/, `${window.location.origin}/api/v1`);
+        .replace(/^https?:\/\/127\.0\.0\.1:8000\/api\/v1/, `${window.location.origin}/api/v1`)
+        .replace(/^https?:\/\/dayleaf-api\.onrender\.com\/api\/v1/, `${window.location.origin}/api/v1`);
     }
     return urlStr
       .replace(/^http:\/\/localhost:8000/, `http://${host}:8000`)

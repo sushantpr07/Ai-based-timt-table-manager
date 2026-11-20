@@ -143,14 +143,15 @@ def create_refresh_session(db: Session, user: User, family_id: uuid.UUID | None 
 
 def set_session_cookies(response: Response, user: User, refresh_token: str, csrf_token: str | None = None):
     csrf_token = csrf_token or secrets.token_urlsafe(32)
-    # Use secure=True only for HTTPS origins (production); False for local HTTP dev
-    _secure = settings.api_origin.startswith("https://")
+    # Use secure=True and samesite="none" on HTTPS so cross-site cookies work across Vercel & Render
+    _secure = True
+    _samesite = "none"
     response.set_cookie("campusflow_session", create_access_token(user), httponly=True, secure=_secure,
-                        samesite="lax", max_age=settings.access_token_minutes * 60, path="/")
+                        samesite=_samesite, max_age=settings.access_token_minutes * 60, path="/")
     response.set_cookie("campusflow_refresh", refresh_token, httponly=True, secure=_secure,
-                        samesite="lax", max_age=settings.refresh_token_days * 24 * 60 * 60, path="/")
+                        samesite=_samesite, max_age=settings.refresh_token_days * 24 * 60 * 60, path="/")
     response.set_cookie("campusflow_csrf", csrf_token, httponly=False, secure=_secure,
-                        samesite="lax", max_age=settings.refresh_token_days * 24 * 60 * 60, path="/")
+                        samesite=_samesite, max_age=settings.refresh_token_days * 24 * 60 * 60, path="/")
 
 
 def revoke_refresh_family(db: Session, family_id, now: datetime):

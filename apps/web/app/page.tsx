@@ -61,8 +61,22 @@ export default function Home() {
 
   useEffect(() => {
     let mounted = true;
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("dayleaf_user");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.email) setViewer(parsed);
+        }
+      } catch {}
+    }
     apiFetch(`${apiBase}/auth/me`).then(response => response.ok ? response.json() : null)
-      .then(data => { if (mounted && data) setViewer(data); }).catch(() => undefined)
+      .then(data => {
+        if (mounted && data) {
+          setViewer(data);
+          try { localStorage.setItem("dayleaf_user", JSON.stringify(data)); } catch {}
+        }
+      }).catch(() => undefined)
       .finally(() => { if (mounted) setAuthChecked(true); });
     return () => { mounted = false; };
   }, [apiBase]);
@@ -72,7 +86,10 @@ export default function Home() {
   function generate() { setNotice(""); setActive("Timetable"); }
 
   async function signOut() {
-    try { await apiFetch(`${apiBase}/auth/sign-out`, { method: "POST" }); } finally { setViewer(null); setActive("Overview"); }
+    try {
+      if (typeof window !== "undefined") localStorage.removeItem("dayleaf_user");
+      await apiFetch(`${apiBase}/auth/sign-out`, { method: "POST" });
+    } finally { setViewer(null); setActive("Overview"); }
   }
 
   const roleNavGroups = viewer && ["faculty", "student"].includes(viewer.role)
