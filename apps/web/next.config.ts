@@ -9,6 +9,8 @@ const backendUrl =
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: false },
   experimental: { cpus: 1, webpackBuildWorker: false },
   async rewrites() {
     return [

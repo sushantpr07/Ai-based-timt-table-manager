@@ -41,8 +41,20 @@ const navGroups = [
   { title: "Insights", items: [["Analytics", Activity], ["Audit log", Activity], ["Settings", Settings2]] as const },
 ];
 
+export type Viewer = {
+  id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  department?: string | null;
+  department_code?: string | null;
+  section?: string | null;
+  semester?: number | null;
+  student_number?: string | null;
+};
+
 export default function Home() {
-  const [viewer, setViewer] = useState<{ id: string; email: string; full_name: string; role: string } | null>(null);
+  const [viewer, setViewer] = useState<Viewer | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [active, setActive] = useState("Overview");
   const [entries, setEntries] = useState(initialEntries);

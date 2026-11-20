@@ -9,7 +9,19 @@ type PersonalEntry = { id: string; timetable: string; version: number; term_id: 
 type Notice = { id: string; title: string; body: string; read: boolean; created_at: string };
 const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-export default function PersonalWorkspace({ active, role, fullName, viewer, onNavigate }: { active: string; role: "faculty" | "student"; fullName: string; viewer?: any; onNavigate: (section: string) => void }) {
+export type PersonalViewer = {
+  id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  department?: string | null;
+  department_code?: string | null;
+  section?: string | null;
+  semester?: number | null;
+  student_number?: string | null;
+};
+
+export default function PersonalWorkspace({ active, role, fullName, viewer, onNavigate }: { active: string; role: "faculty" | "student"; fullName: string; viewer?: PersonalViewer | null; onNavigate: (section: string) => void }) {
   const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
   const [entries, setEntries] = useState<PersonalEntry[]>([]);
   const [notifications, setNotifications] = useState<Notice[]>([]);
