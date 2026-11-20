@@ -144,7 +144,14 @@ export default function Home() {
         <span className="dayleaf-brand-icon"><Sparkles size={18} strokeWidth={2.4} aria-hidden="true"/></span>
         <span className="dayleaf-brand-title">Day<span className="dayleaf-brand-leaf">leaf</span></span>
       </a>
-      <div className="campus-switch"><span className="campus-avatar">{viewer?.full_name?.slice(0, 1) ?? "D"}</span><span className="campus-copy"><b>{viewer ? "Your institution" : "Northbridge University · Dayleaf"}</b><small>{viewer?.role?.replaceAll("_", " ") ?? "Preview workspace"}</small></span><ChevronDown size={15} /></div>
+      <div className="campus-switch">
+        <span className="campus-avatar">{viewer?.full_name?.slice(0, 1) ?? "D"}</span>
+        <span className="campus-copy">
+          <b>{viewer?.department ? `${viewer.department_code ?? viewer.department}` : (viewer ? "Dayleaf University" : "Northbridge University · Dayleaf")}</b>
+          <small>{viewer?.section ? `Sem ${viewer.semester ?? 3}-${viewer.section} · ${viewer.role}` : (viewer?.role?.replaceAll("_", " ") ?? "Preview workspace")}</small>
+        </span>
+        <ChevronDown size={15} />
+      </div>
       <nav className="side-nav" aria-label="Main navigation">{roleNavGroups.map(group => <div className="nav-group" key={group.title}><div className="nav-label">{group.title}</div>{group.items.filter(([label]) => label !== "Audit log" || !viewer || ["super_admin", "college_admin", "hod"].includes(viewer.role)).map(([label, Icon]) => { const displayedLabel = label === "Timetable" && viewer && ["faculty", "student"].includes(viewer.role) ? "My timetable" : label; return <button key={label} className={`nav-link ${active === label ? "selected" : ""}`} aria-label={displayedLabel} aria-current={active === label ? "page" : undefined} onClick={() => setActive(label)}><Icon size={17} strokeWidth={1.8} aria-hidden="true"/><span>{displayedLabel}</span>{label === "AI planner" && <span className="new-tag">AI</span>}</button>; })}</div>)}</nav>
       <div className="sidebar-bottom"><div className="term-card"><div className="term-dot"/><div><small>{viewer ? "ACCOUNT" : "ACTIVE SEMESTER"}</small><b>{viewer ? viewer.email : "Fall semester 2026"}</b></div><ChevronDown size={14}/></div>{viewer ? <button className="profile-row" onClick={() => void signOut()} title="Sign out"><div className="profile-avatar">{viewer.full_name.split(" ").map(part => part[0]).slice(0, 2).join("")}</div><span><b>{viewer.full_name}</b><small>Sign out of Dayleaf</small></span><LogOut size={15}/></button> : <Link className="profile-row" href="/sign-in" title="Sign in"><div className="profile-avatar">DL</div><span><b>Sign in</b><small>Access Dayleaf Studio</small></span><MoreHorizontal size={17}/></Link>}</div>
     </aside>

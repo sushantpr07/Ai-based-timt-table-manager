@@ -23,7 +23,7 @@ from app.assistant import assistant_reply, requests_timetable_generation
 from app.assistant_context import build_assistant_context
 from app.dependencies import current_user, ensure_browser_origin
 from app.db import Base, engine, get_db
-from app.models import AcademicTerm, AuditEvent, Department, EmailVerificationToken, Institution, PasswordResetToken, RefreshSession, Role, User
+from app.models import AcademicTerm, AuditEvent, Department, EmailVerificationToken, Institution, PasswordResetToken, RefreshSession, Role, Section, Semester, Student, User
 from app.schemas import (AssistantConfirmRequest, AssistantRequest, EmailTokenRequest, ForgotPasswordRequest,
                          ResendVerificationRequest, ResetPasswordRequest, SignInRequest,
                          SignUpRequest, StoredTimetableGenerateRequest, UserView)
@@ -122,10 +122,47 @@ async def safe_request_logging(request: Request, call_next):
     return response
 
 
-def user_view(user: User, email_verification_required: bool = False) -> UserView:
-    return UserView(id=str(user.id), email=user.email, full_name=user.full_name, role=user.role.value,
-                    email_verified=user.email_verified,
-                    email_verification_required=email_verification_required)
+def user_view(user: User, email_verification_required: bool = False, db: Session | None = None) -> UserView:
+    dept_name = None
+    dept_code = None
+    sec_name = None
+    sem_number = None
+    roll_no = None
+
+    if db is not None:
+        if user.role == Role.student:
+            student = db.scalar(select(Student).where(Student.user_id == user.id))
+            if student:
+                roll_no = student.student_number
+                sec = db.get(Section, student.section_id)
+                if sec:
+                    sec_name = sec.name
+                    sem = db.get(Semester, sec.semester_id)
+                    if sem:
+                        sem_number = sem.number
+                        dept = db.get(Department, sem.department_id)
+                        if dept:
+                            dept_name = dept.name
+                            dept_code = dept.code
+        elif user.department_id:
+            dept = db.get(Department, user.department_id)
+            if dept:
+                dept_name = dept.name
+                dept_code = dept.code
+
+    return UserView(
+        id=str(user.id),
+        email=user.email,
+        full_name=user.full_name,
+        role=user.role.value,
+        email_verified=user.email_verified,
+        email_verification_required=email_verification_required,
+        department=dept_name,
+        department_code=dept_code,
+        section=sec_name,
+        semester=sem_number,
+        student_number=roll_no,
+    )
 
 
 def verify_browser_origin(request: Request):
@@ -269,7 +306,7 @@ def sign_in(payload: SignInRequest, response: Response, request: Request,
     refresh_token = create_refresh_session(db, user)
     db.commit()
     set_session_cookies(response, user, refresh_token, request.cookies.get("campusflow_csrf"))
-    return user_view(user)
+    return user_view(user, db=db)
 
 
 @app.post("/api/v1/auth/verify-email", response_model=UserView)
@@ -391,8 +428,8 @@ def reset_password(payload: ResetPasswordRequest, db: Session = Depends(get_db))
 
 
 @app.get("/api/v1/auth/me", response_model=UserView)
-def me(user: User = Depends(current_user)):
-    return user_view(user)
+def me(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    return user_view(user, db=db)
 
 
 @app.post("/api/v1/assistant/chat")

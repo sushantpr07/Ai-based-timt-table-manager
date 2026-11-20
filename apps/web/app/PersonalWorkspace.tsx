@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Bell, CalendarDays, Check, Clock3, ExternalLink, RefreshCw } from "lucide-react";
+import { Bell, CalendarDays, Check, Clock3, ExternalLink, GraduationCap, RefreshCw } from "lucide-react";
 import { apiFetch } from "./api-client";
 import { useCampusEvents } from "./useCampusEvents";
 
@@ -16,6 +16,13 @@ export default function PersonalWorkspace({ active, role, fullName, onNavigate }
   const [termId, setTermId] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [meta, setMeta] = useState<{
+    department?: string | null;
+    department_code?: string | null;
+    section?: string | null;
+    semester?: number | null;
+    student_number?: string | null;
+  }>({});
 
   const load = useCallback(async () => {
     setLoading(true); setError("");
@@ -29,6 +36,13 @@ export default function PersonalWorkspace({ active, role, fullName, onNavigate }
       const notices = await noticeResponse.json();
       setEntries(schedule.entries);
       setNotifications(notices);
+      setMeta({
+        department: schedule.department,
+        department_code: schedule.department_code,
+        section: schedule.section,
+        semester: schedule.semester,
+        student_number: schedule.student_number,
+      });
       setTermId(current => current || schedule.entries.find((entry: PersonalEntry) => entry.is_current_term)?.term_id || schedule.entries[0]?.term_id || "");
     } catch (e) { setError(e instanceof Error ? e.message : "Could not load your workspace."); }
     finally { setLoading(false); }
@@ -60,7 +74,67 @@ export default function PersonalWorkspace({ active, role, fullName, onNavigate }
   if (active === "Settings") return <section className="personal-panel panel"><div className="personal-heading"><div><span className="panel-kicker">ACCOUNT PREFERENCES</span><h2>Settings</h2><p>Signed in as {fullName}. Notification and profile preferences are next in the rollout.</p></div></div><div className="settings-preview"><Bell size={18}/><span><b>Timetable announcements</b><small>We’ll show schedule updates in your Dayleaf notifications.</small></span><span className="enabled-pill">On</span></div></section>;
 
   return <section className="personal-workspace">
-    <div className="personal-heading"><div><span className="panel-kicker">{role === "student" ? "STUDENT WORKSPACE" : "FACULTY WORKSPACE"}</span><h2><CalendarDays size={21}/> {active === "Overview" ? `Good to see you, ${fullName.split(" ")[0]}.` : "My timetable"}</h2><p>{role === "student" ? "Your published class schedule, all in one place." : "Your teaching schedule and room assignments."}</p></div><div className="personal-actions"><button className="button button-quiet" onClick={() => void load()} disabled={loading}><RefreshCw size={14}/> Refresh</button><button className="button button-primary" onClick={() => onNavigate("Notifications")}><Bell size={14}/> Notifications {unread > 0 && <span className="button-count">{unread}</span>}</button></div></div>
+    <div className="personal-heading">
+      <div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "8px" }}>
+          <span className="panel-kicker">{role === "student" ? "STUDENT WORKSPACE" : "FACULTY WORKSPACE"}</span>
+          {meta.department && (
+            <span style={{ 
+              display: "inline-flex", 
+              alignItems: "center", 
+              gap: "5px", 
+              background: "rgba(168, 85, 247, 0.15)", 
+              color: "#c084fc", 
+              padding: "3px 10px", 
+              borderRadius: "6px", 
+              fontSize: "12px", 
+              fontWeight: 600,
+              border: "1px solid rgba(168, 85, 247, 0.3)"
+            }}>
+              <GraduationCap size={13}/> {meta.department} ({meta.department_code})
+            </span>
+          )}
+          {meta.section && (
+            <span style={{ 
+              display: "inline-flex", 
+              alignItems: "center", 
+              gap: "5px", 
+              background: "rgba(59, 130, 246, 0.15)", 
+              color: "#60a5fa", 
+              padding: "3px 10px", 
+              borderRadius: "6px", 
+              fontSize: "12px", 
+              fontWeight: 600,
+              border: "1px solid rgba(59, 130, 246, 0.3)"
+            }}>
+              Semester {meta.semester ?? 3} · Section {meta.section}
+            </span>
+          )}
+          {meta.student_number && (
+            <span style={{ 
+              display: "inline-flex", 
+              alignItems: "center", 
+              gap: "5px", 
+              background: "rgba(16, 185, 129, 0.15)", 
+              color: "#34d399", 
+              padding: "3px 10px", 
+              borderRadius: "6px", 
+              fontSize: "12px", 
+              fontWeight: 600,
+              border: "1px solid rgba(16, 185, 129, 0.3)"
+            }}>
+              Roll: {meta.student_number}
+            </span>
+          )}
+        </div>
+        <h2><CalendarDays size={21}/> {active === "Overview" ? `Good to see you, ${fullName.split(" ")[0]}.` : "My timetable"}</h2>
+        <p>{meta.department ? `${meta.department} · Class Schedule & Room Allocations` : (role === "student" ? "Your published class schedule, all in one place." : "Your teaching schedule and room assignments.")}</p>
+      </div>
+      <div className="personal-actions">
+        <button className="button button-quiet" onClick={() => void load()} disabled={loading}><RefreshCw size={14}/> Refresh</button>
+        <button className="button button-primary" onClick={() => onNavigate("Notifications")}><Bell size={14}/> Notifications {unread > 0 && <span className="button-count">{unread}</span>}</button>
+      </div>
+    </div>
     {error && <div className="notice error-notice">{error}</div>}
     <div className="personal-summary"><div><span className="summary-icon"><CalendarDays size={17}/></span><span><small>PUBLISHED CLASSES</small><b>{shown.length}</b></span></div><div><span className="summary-icon amber"><Clock3 size={17}/></span><span><small>UNREAD UPDATES</small><b>{unread}</b></span></div><div><span className="summary-icon green"><Check size={17}/></span><span><small>STATUS</small><b>{shown.length ? "Up to date" : "Awaiting publish"}</b></span></div></div>
     <section className="personal-panel panel"><div className="personal-schedule-heading"><div><div className="panel-kicker">PUBLISHED SCHEDULE</div><h3>{shown[0]?.term ? `${shown[0].term} · ${shown[0].academic_year}` : "Your weekly schedule"}</h3></div>{terms.length > 1 && <label className="term-picker">Term<select value={termId} onChange={event => setTermId(event.target.value)}>{terms.map(term => <option key={term.term_id} value={term.term_id}>{term.term} · {term.academic_year}</option>)}</select></label>}</div>

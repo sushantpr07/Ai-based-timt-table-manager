@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.calendar import build_period_labels
 from app.dependencies import current_user, ensure_browser_origin
-from app.models import (AcademicTerm, Faculty, Notification, Role, Room, Section, Student, Subject,
+from app.models import (AcademicTerm, Department, Faculty, Notification, Role, Room, Section, Semester, Student, Subject,
                         Timetable, TimetableEntry, User)
 
 router = APIRouter(prefix="/api/v1/me", tags=["personal workspace"])
@@ -16,16 +16,38 @@ router = APIRouter(prefix="/api/v1/me", tags=["personal workspace"])
 
 @router.get("/schedule")
 def my_published_schedule(db: Session = Depends(get_db), user: User = Depends(current_user)):
+    dept_name = None
+    dept_code = None
+    sec_name = None
+    sem_number = None
+    roll_no = None
+
     if user.role == Role.student:
         student = db.scalar(select(Student).where(Student.user_id == user.id))
         if not student:
             return {"role": user.role.value, "entries": []}
         resource_filter = TimetableEntry.section_id == student.section_id
+        sec = db.get(Section, student.section_id)
+        if sec:
+            sec_name = sec.name
+            sem = db.get(Semester, sec.semester_id)
+            if sem:
+                sem_number = sem.number
+                dept = db.get(Department, sem.department_id)
+                if dept:
+                    dept_name = dept.name
+                    dept_code = dept.code
+        roll_no = student.student_number
     elif user.role == Role.faculty:
         faculty = db.scalar(select(Faculty).where(Faculty.user_id == user.id))
         if not faculty:
             return {"role": user.role.value, "entries": []}
         resource_filter = TimetableEntry.faculty_id == faculty.id
+        if user.department_id:
+            dept = db.get(Department, user.department_id)
+            if dept:
+                dept_name = dept.name
+                dept_code = dept.code
     else:
         raise HTTPException(status_code=403, detail="This schedule view is for faculty and students.")
 
@@ -38,20 +60,29 @@ def my_published_schedule(db: Session = Depends(get_db), user: User = Depends(cu
              .where(Timetable.status == "published", resource_filter)
              .order_by(Timetable.created_at.desc(), TimetableEntry.day, TimetableEntry.start_period))
     rows = db.execute(query).all()
-    return {"role": user.role.value, "entries": [
-        {"id": str(entry.id), "timetable": timetable.name, "version": timetable.version,
-         "term_id": str(timetable.term_id), "term": term.name, "academic_year": term.academic_year,
-         "is_current_term": term.is_current, "days": timetable.days, "periods_per_day": timetable.periods_per_day,
-         "period_labels": timetable.period_labels or build_period_labels("09:00", 60, timetable.periods_per_day),
-         "weekdays": timetable.weekdays or list(range(timetable.days)),
-         "section": section.name,
-         "section_id": str(section.id), "subject": subject.name, "subject_code": subject.code,
-         "room": room.name, "day": entry.day,
-         "weekday": (timetable.weekdays or list(range(timetable.days)))[entry.day]
-         if 0 <= entry.day < len(timetable.weekdays or list(range(timetable.days))) else entry.day,
-         "period": entry.start_period,
-         "duration_periods": entry.duration_periods}
-        for entry, timetable, subject, section, room, term in rows]}
+    return {
+        "role": user.role.value,
+        "department": dept_name,
+        "department_code": dept_code,
+        "section": sec_name,
+        "semester": sem_number,
+        "student_number": roll_no,
+        "entries": [
+            {"id": str(entry.id), "timetable": timetable.name, "version": timetable.version,
+             "term_id": str(timetable.term_id), "term": term.name, "academic_year": term.academic_year,
+             "is_current_term": term.is_current, "days": timetable.days, "periods_per_day": timetable.periods_per_day,
+             "period_labels": timetable.period_labels or build_period_labels("09:00", 60, timetable.periods_per_day),
+             "weekdays": timetable.weekdays or list(range(timetable.days)),
+             "section": section.name,
+             "section_id": str(section.id), "subject": subject.name, "subject_code": subject.code,
+             "room": room.name, "day": entry.day,
+             "weekday": (timetable.weekdays or list(range(timetable.days)))[entry.day]
+             if 0 <= entry.day < len(timetable.weekdays or list(range(timetable.days))) else entry.day,
+             "period": entry.start_period,
+             "duration_periods": entry.duration_periods}
+            for entry, timetable, subject, section, room, term in rows
+        ]
+    }
 
 
 @router.get("/notifications")

@@ -43,6 +43,11 @@ class UserView(BaseModel):
     role: str
     email_verified: bool = False
     email_verification_required: bool = False
+    department: str | None = None
+    department_code: str | None = None
+    section: str | None = None
+    semester: int | None = None
+    student_number: str | None = None
 
 
 class GenerateRequest(BaseModel):
