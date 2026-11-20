@@ -144,7 +144,8 @@ def generate_schedule(payload: dict, *, with_metadata: bool = False):
                    + 10 * sum(balance_terms)
                    + sum(penalty_terms))
     solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = 5.0
+    solver.parameters.max_time_in_seconds = 25.0
+    solver.parameters.num_search_workers = 1
     status = solver.solve(model)
     if status not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
         if status == cp_model.INFEASIBLE:

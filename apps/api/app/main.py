@@ -23,7 +23,7 @@ from app.assistant import assistant_reply, requests_timetable_generation
 from app.assistant_context import build_assistant_context
 from app.dependencies import current_user, ensure_browser_origin
 from app.db import Base, engine, get_db
-from app.models import AcademicTerm, AuditEvent, Department, EmailVerificationToken, Institution, PasswordResetToken, RefreshSession, Role, Section, Semester, Student, User
+from app.models import AcademicTerm, AuditEvent, Department, EmailVerificationToken, Institution, PasswordResetToken, RefreshSession, Role, Section, Semester, Student, Timetable, User
 from app.schemas import (AssistantConfirmRequest, AssistantRequest, EmailTokenRequest, ForgotPasswordRequest,
                          ResendVerificationRequest, ResetPasswordRequest, SignInRequest,
                          SignUpRequest, StoredTimetableGenerateRequest, UserView)
@@ -468,8 +468,10 @@ async def assistant_chat(payload: AssistantRequest, request: Request, db: Sessio
 def confirm_assistant_action(payload: AssistantConfirmRequest, request: Request, db: Session = Depends(get_db),
                              user: User = Depends(current_user)):
     verify_browser_origin(request)
-    # Confirmation triggers a real optimizer run; campus authorization, readiness,
-    # persistence, conflict validation, and audit checks remain in the campus service.
+    existing = db.scalar(select(Timetable).where(Timetable.department_id == payload.department_id).order_by(Timetable.version.desc()).limit(1))
+    periods = existing.periods_per_day if existing else 6
+    days = existing.days if existing else 5
+    weekdays = existing.weekdays if existing else list(range(days))
     return generate_stored_timetable(
         StoredTimetableGenerateRequest(term_id=payload.term_id, department_id=payload.department_id,
-                                       name=payload.name), request, db, user)
+                                       name=payload.name, periods_per_day=periods, days=days, weekdays=weekdays), request, db, user)
