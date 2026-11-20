@@ -10,5 +10,6 @@ node_modules/
 *.log
 .tools/
 *.db
+!apps/api/campusflow-seed.db
 bin/
 ~$*

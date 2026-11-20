@@ -36,11 +36,14 @@ from app.routes.settings import router as settings_router
 from app.routes.superadmin import router as superadmin_router
 from app.rate_limit import limit_auth_requests, redis_limiter
 from app.events import publish_campus_refresh, subscribe_campus_events, unsubscribe_campus_events
+from app.auto_seed import restore_seed_db_if_needed, ensure_users_exist
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    restore_seed_db_if_needed()
     if settings.auto_create_schema:
         Base.metadata.create_all(bind=engine)
+    ensure_users_exist()
     try:
         yield
     finally:
